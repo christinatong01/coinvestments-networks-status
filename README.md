@@ -14,8 +14,7 @@
 
 ## Methods
 ### Overall approach: "DFS"
-- for each firm i:
-  - calculate average beta centrality across all 5-year windows
+For each firm i, calculate average beta centrality across all 5-year windows
 
 Example: find beta centralities of all firms in 2013
 - firm 1: founded in 2009, firm 2: founded in 2006, firm 3: founded in 2008
