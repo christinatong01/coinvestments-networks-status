@@ -13,6 +13,26 @@
 `investments` and `funding_rounds` were merged based on `funding_round_uuid`, which was then merged with `organizations` on `investor_uuid` to add the `founded_on` column.
 
 ## Methods
+### Overall approach: "DFS"
+- for each firm i:
+  - calculate average beta centrality across all 5-year windows
+
+Example: find beta centralities of all firms in 2013
+- firm 1: founded in 2009, firm 2: founded in 2006, firm 3: founded in 2008
+
+- Firm 1 DFS:
+  - 2009-2013: build graph + beta centrality
+- Firm 2 DFS:
+  - 2006-2010: build graph + beta centrality
+  - 2007-2011: build graph + beta centrality
+  - 2008-2012: build graph + beta centrality
+  - 2009-2013: build graph + beta centrality
+  - calculate average beta centrality across 4 windows
+- Firm 3 DFS:
+  - 2008-2012: build graph + beta centrality
+  - 2009-2013: build graph + beta centrality
+  - calculate average beta centrality across 2 windows
+
 ### Data processing and manipulation
 There are two important data structures being used. The first keeps track of investor id mapped to its corresponding founded date, sorted from earliest founded date. The second keeps track of every year in the dataset mapped to every funding round that happened in that year.
 
