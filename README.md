@@ -8,29 +8,31 @@
 `initial/` folder contains some initial calculations I did to understand beta centrality. This calculates values for the whole dataset without 5 year moving window for smoothing.
 
 ## Data
-`coinvestments.csv` is a joined table between `organizations`, `investments`, and `funding_rounds`. 
+`coinvestments.csv` is a joined table between `investments`, `funding_rounds`, and `organizations`. 
 
 `investments` and `funding_rounds` were merged based on `funding_round_uuid`, which was then merged with `organizations` on `investor_uuid` to add the `founded_on` column.
 
 ## Methods
 ### Overall approach: "DFS"
-For each firm i, calculate average beta centrality across all 5-year windows
+For each investor, calculate average beta centrality across all 5-year windows from founding date to interested year.
 
-Example: find beta centralities of all firms in 2013
-- firm 1: founded in 2009, firm 2: founded in 2006, firm 3: founded in 2008
+Example: find beta centralities of investors in year 2013
+- Investor 1: founded in 2009, Investor 2: founded in 2006, Investor 3: founded in 2008
 
-- Firm 1 DFS:
+- Investor 1 DFS:
   - 2009-2013: build graph + beta centrality
-- Firm 2 DFS:
+- Investor 2 DFS:
   - 2006-2010: build graph + beta centrality
   - 2007-2011: build graph + beta centrality
   - 2008-2012: build graph + beta centrality
   - 2009-2013: build graph + beta centrality
   - calculate average beta centrality across 4 windows
-- Firm 3 DFS:
+- Investor 3 DFS:
   - 2008-2012: build graph + beta centrality
   - 2009-2013: build graph + beta centrality
   - calculate average beta centrality across 2 windows
+ 
+Can index results for a specified investor.
 
 ### Data processing and manipulation
 There are two important data structures being used. The first keeps track of investor id mapped to its corresponding founded date, sorted from earliest founded date. The second keeps track of every year in the dataset mapped to every funding round that happened in that year.
