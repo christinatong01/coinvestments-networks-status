@@ -2,7 +2,9 @@
 
 ## File organization
 `get_centrality.py` is the main code.
+
 `coinvestments.csv` is the data.
+
 `initial/` folder contains some initial calculations I did to understand beta centrality. This calculates values for the whole dataset without 5 year moving window for smoothing.
 
 ## Data
