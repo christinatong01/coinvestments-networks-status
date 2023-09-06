@@ -1,18 +1,7 @@
 import csv
 import networkx as nx
-import numpy as np
 import sys
 import datetime
-
-# Round class
-class Round:
-    def __init__(self, funding_round_uuid, investor_uuid, investor_name, founded_on):
-        self.funding_round_uuid = funding_round_uuid
-        self.investor_uuid = investor_uuid
-        self.investor_name = investor_name
-        self.founded_on = founded_on
-
-    # def __str__()
 
 # Constants
 DEFAULT_BETA = 0.1
@@ -20,6 +9,14 @@ DEFAULT_ALPHA = 0.1
 WINDOW_SIZE = 5
 NULL_DATE = datetime.datetime(1000, 1, 1)
 csv_file = "coinvestments.csv"
+
+# Class definition
+class Round:
+    def __init__(self, funding_round_uuid, investor_uuid, investor_name, founded_on):
+        self.funding_round_uuid = funding_round_uuid
+        self.investor_uuid = investor_uuid
+        self.investor_name = investor_name
+        self.founded_on = founded_on
 
 # Calculate beta centrality for a given graph. 
 # Returns centralities map for nodes in the graph.
@@ -49,6 +46,7 @@ def build_graph(rounds):
     for round in rounds:
         funding_round_id = round.funding_round_uuid
         investor_id = round.investor_uuid
+        investor_id_name_map[investor_id] = round.investor_name
         
         # Create node
         graph.add_node(investor_id)
@@ -88,16 +86,12 @@ if len(sys.argv) != 2:
 interested_year = int(sys.argv[1])
 
 # Set up vars
-funding_round_investor_map = {}
-investor_id_name_map = {}
-graph = nx.Graph()
+investor_id_name_map = {} # investor_uuid to investor name
+graph = nx.Graph() # Every node in NetworkX graph represents an investor, connected to other investors via round
 investor_map = {} # investor_uuid to founding date
 yearly_rounds_map = {} # year to rounds that happened that year
-centralities_map = {} # investment firm to beta centrality
+centralities_map = {} # investment firm to list of beta centralities from every 5 year window
 results_map = {} # results map with investment firm to averaged beta centrality
-
-# Another hashmap to map years to list of rounds that happened that year.
-# Update map investor_uuid to map to founding date
 # Get oldest founding date and create 5 year windows (append the 5 lists together) from that date up until year in question. Build graph/calc centrality for every 5 year window. 
 
 # Read from CSV
@@ -131,27 +125,25 @@ with open(csv_file, mode='r') as file:
             yearly_rounds_map[created_at_date.year] = []
             
         yearly_rounds_map[created_at_date.year].append(Round(funding_round_id, investor_id, investor_name, founded_date))
-# print(yearly_rounds_map)
 
 # Sort both maps by year 
 yearly_rounds_map = dict(sorted(yearly_rounds_map.items()))
 investor_map = dict(sorted(investor_map.items(), key=lambda item: item[1]))
 print(yearly_rounds_map.keys())
-# print(investor_map)
+
 for investor_id, founded_date in investor_map.items():
     if investor_id not in centralities_map:
         centralities_map[investor_id] = []
-    
-    for year in range(founded_date.year, interested_year - WINDOW_SIZE):
-        # print(founded_date.year)
-        rounds = []
-        for i in range(year, year + WINDOW_SIZE):
-            # print(yearly_rounds_map[i] if i in yearly_rounds_map else [])
-            rounds += yearly_rounds_map[i] if i in yearly_rounds_map else []
-        # print(rounds)
-        centralities = calculate_beta_centrality(build_graph(rounds))
         
-        # Add the items from centralities into centralities_map
+    window = min(WINDOW_SIZE, interested_year - founded_date.year)
+    
+    for year in range(founded_date.year, interested_year - window):
+        rounds = []
+        for i in range(year, year + min(WINDOW_SIZE, interested_year - year)):
+            rounds += yearly_rounds_map[i] if i in yearly_rounds_map else []
+        centralities = calculate_beta_centrality(build_graph(rounds)) # centralities for one 5-year period
+    
+        # Add the items from centralities (representing one 5-year period) into centralities_map
         for inv, score in centralities.items():
             if inv not in centralities_map:
                 centralities_map[inv] = []
@@ -159,5 +151,9 @@ for investor_id, founded_date in investor_map.items():
             
 for inv, scores in centralities_map.items():
     if inv not in results_map:
-        results_map[inv] = sum(centralities_map[inv]) / len(centralities_map[inv]) # Take average
+        denominator = len(centralities_map[inv])
+        if denominator != 0:
+            results_map[inv] = sum(centralities_map[inv]) / denominator # Take average
+        else: 
+            results_map[inv] = 0 # If denominator is 0, then set centrality to 0
         print(f"{inv}: {results_map[inv]}")
