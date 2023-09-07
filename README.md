@@ -41,6 +41,5 @@ There are two important data structures being used. The first keeps track of inv
 Using `investments_map`, get oldest founding date and create 5 year windows from that date to the year in question. Build graph with investors as nodes and edges based on shared funding rounds. Run beta centrality function on every 5 year window. Average beta centralities for each investor.
 
 ## Next steps
-* How to set beta? From Pollock et al., 2015, "In our analysis, we set beta to 75% of the reciprocal of the largest eigenvalue" [p. 493]. The larger the beta, the more it reflects global structure. Currently, it is set at default beta of 0.1. 
+* Setting beta? From Pollock et al., 2015, "In our analysis, we set beta to 75% of the reciprocal of the largest eigenvalue" [p. 493]. The larger the beta, the more it reflects global structure. Currently, it is set at default beta of 0.1. 
 * What to do with individuals? Currently, it filters them out.
-* Need to fix windows when there are less than 5 years.
